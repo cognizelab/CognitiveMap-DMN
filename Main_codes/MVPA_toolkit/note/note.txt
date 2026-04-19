@@ -1,0 +1,4 @@
+https://github.com/iqiukp/RVM-MATLAB
+
+BrainGNN: Interpretable Brain Graph Neural Network for fMRI Analysis
+https://github.com/xxlya/BrainGNN_Pytorch

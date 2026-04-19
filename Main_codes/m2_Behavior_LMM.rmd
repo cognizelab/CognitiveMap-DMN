@@ -1,0 +1,228 @@
+---
+title: "Linear Mixed-Effects Models for Behavioral Analyses"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message = FALSE,
+	warning = FALSE
+)
+library(ggplot2)
+library(ggsignif)
+library(plyr)
+library(dplyr)
+library(plotly)
+library(tidyr)
+library(readr)
+library(ggExtra)
+library(lme4)
+library(lmerTest)
+library(ggforce)
+library(ggeffects)
+library(emmeans)
+
+
+```
+
+
+#🔷 1️⃣ Spatial Memory Precision Models
+```{r lmm_SMA}
+
+# ============================================================
+# LMM 1 — Spatial Memory Precision (SMA_z)
+# Fixed: Learning (Repetition & Block )
+# Random: subject slopes & intercepts
+# ============================================================
+
+lmm_SMA <- lmer(
+  SMA_z ~ timesObjectPresented_block + block_num +
+    (1 + timesObjectPresented_block + block_num | Rnum),
+  data = LMM_behavior,
+  REML = TRUE
+)
+
+summary(lmm_SMA)
+
+
+# ------------------------------------------------------------
+# Marginal predictions
+# ------------------------------------------------------------
+
+pred_SMA_top   <- ggpredict(lmm_SMA, terms = "timesObjectPresented_block")
+pred_SMA_block <- ggpredict(lmm_SMA, terms = "block_num")
+
+
+```
+
+
+# 🔷 2️⃣ Navigation Efficiency Models
+
+```{r lmm_NE}
+
+# ============================================================
+# LMM 2 — Navigation Efficiency (NE_z)
+# Fixed: Learning (Repetition & Block)
+# Random: subject slopes & intercepts
+# ============================================================
+
+lmm_NE <- lmer(
+  NE_z ~ timesObjectPresented_block + block_num +
+    (1 + timesObjectPresented_block + block_num | Rnum),
+  data = LMM_behavior,
+  REML = TRUE
+)
+
+summary(lmm_NE)
+
+
+# ------------------------------------------------------------
+# Marginal predictions
+# ------------------------------------------------------------
+
+pred_NE_top   <- ggpredict(lmm_NE, terms = "timesObjectPresented_block")
+pred_NE_block <- ggpredict(lmm_NE, terms = "block_num")
+
+```
+
+
+# 🔷 3️⃣ Lagged Learning Dynamics
+
+
+```{r lag}
+
+# ============================================================
+# LMM 3 — NE_z predicted by previous SMA (lag effect)
+# Fixed: navigation behavior from previous presentation of the same objects
+# Random: subject slopes & intercepts
+# ============================================================
+
+
+
+lmm_lag <- lmer(
+  AE ~ lag_SMA + 
+    (1 + lag_SMA | Rnum),
+  data = LMM_behavior,
+  REML = TRUE
+)
+
+summary(lmm_lag)
+pred_AE_SMA   <- ggpredict(lmm_lag, terms = "lag_SMA")
+
+
+lmm_lag <- lmer(
+  PE*100 ~ lag_SMA + 
+    (1 + lag_SMA | Rnum),
+  data = LMM_behavior,
+  REML = TRUE
+)
+
+summary(lmm_lag)
+pred_PE_SMA <- ggpredict(lmm_lag, terms = "lag_SMA")
+
+
+
+lmm_lag <- lmer(
+  NE_z ~ lag_SMA  +
+    (1 + lag_SMA | Rnum),
+  data = LMM_behavior,
+  REML = TRUE
+)
+
+summary(lmm_lag)
+pred_NE_SMA <- ggpredict(lmm_lag, terms = "lag_SMA")
+
+
+lmm_lag <- lmer(
+  SMA_z ~ lag_NE + 
+    (1 + lag_NE | Rnum),
+  data = LMM_behavior,
+  REML = TRUE
+)
+
+summary(lmm_lag)
+pred_SMA_NE <- ggpredict(lmm_lag, terms = "lag_NE")
+```
+# LMM -raw metrics
+
+```{r}
+# ============================================================
+# LMM - Placement error(PlE), Accuracy rate(AR), Angular error(AE), Path efficiency(PE)
+# Fixed: Learning (Repetition & Block)
+# Random: subject slopes & intercept
+# ============================================================
+Behavior_TOP <- LMM_all %>%
+  group_by(Rnum,block_num,timesObjectPresented,timesObjectPresented_block) %>%
+  summarise(AR = sum(AR)/6,
+            PlE = mean(PlE),
+            PE = mean(PE),
+            AE = mean(AE)
+            )
+lmm_PlE <- lmer(
+  PlE ~ timesObjectPresented +
+    (1 + timesObjectPresented | Rnum),
+  data = Behavior_TOP,
+  REML = TRUE
+)
+
+summary(lmm_PlE)
+
+lmm_AR <- lmer(
+  AR*100 ~ timesObjectPresented +
+    (1 + timesObjectPresented | Rnum),
+  data = Behavior_TOP,
+  REML = TRUE
+)
+
+summary(lmm_AR)
+
+lmm_PE <- lmer(
+  PE*100 ~ timesObjectPresented +
+    (1 + timesObjectPresented | Rnum),
+  data = Behavior_TOP,
+  REML = TRUE
+)
+
+summary(lmm_PE)
+
+lmm_AE <- lmer(
+  AE ~  timesObjectPresented +
+    (1 +  timesObjectPresented| Rnum),
+  data = Behavior_TOP,
+  REML = TRUE
+)
+
+summary(lmm_AE)
+
+```
+
+```{r save data}
+pred_list <- list(
+  SMA_top = pred_SMA_top,
+  SMA_block = pred_SMA_block,
+  NE_top = pred_NE_top,
+  NEhhh_block = pred_NE_block,
+  AE_lagSMA  = pred_AE_SMA,
+  PE_lagSMA  = pred_PE_SMA,
+  NE_lagSMA  = pred_NE_SMA,
+  SMA_lagNE  = pred_SMA_NE
+)
+
+
+for (name in names(pred_list)) {
+  pred <- pred_list[[name]]
+  out_df <- data.frame(
+    x     = pred$x,
+    fit   = pred$predicted,
+    lower = pred$conf.low,
+    upper = pred$conf.high
+  )
+  write.csv(out_df, 
+            file = paste0(base_path, name, "_fixedEffect.csv"), 
+            row.names = FALSE)
+}
+
+```
+
+

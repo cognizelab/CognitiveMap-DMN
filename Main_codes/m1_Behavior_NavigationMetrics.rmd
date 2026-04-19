@@ -1,0 +1,470 @@
+```{r library}
+library(ggplot2)
+library(ggsignif)
+library(plyr)
+library(dplyr)
+library(plotly)
+library(tidyr)
+library(readr)
+library(ggExtra)
+library(lme4)
+library(lmerTest)
+library(ggforce)
+library(ggeffects)
+library(emmeans)
+```
+
+```{r functions}
+distance <- function(x1, y1, x2, y2) {
+  euclidean_distance <- sqrt((x2 - x1)^2 + (y2 - y1)^2)
+  
+  return(euclidean_distance)
+}
+
+correct_test <- function(x, z, object,obj_loc,trial_type) {
+  if (trial_type == "retrieval") {
+    obj_Names <- obj_loc$objectName
+    distances <- numeric()
+    object_x <- obj_loc[obj_loc$objectName == object,]$x
+    object_z <- obj_loc[obj_loc$objectName == object,]$z
+    object_distance <- distance(x,z,object_x,object_z)
+    for (obj in obj_Names) {
+      obj_x <- obj_loc[obj_loc$objectName == obj,]$x
+      obj_z <- obj_loc[obj_loc$objectName == obj,]$z
+      obj_distance <-distance(x,z,obj_x,obj_z)
+      distances <- append(distances,obj_distance)
+    }
+    min_distance <- min(distances)
+  
+    if (object_distance == min_distance){
+      test <- TRUE}
+      else{
+        test <- FALSE
+      }
+  
+  
+  }
+  else{test <- NA}
+  return(test)
+  
+}
+
+calculate_TOP_in_block <- function(session,block_num,timesObjectPresented){
+  if (session == "3T"){
+    if ((block_num > 0) && (block_num<=2)) {
+      TOP_block <- timesObjectPresented - (block_num -1)*3
+    }
+    else {
+      TOP_block <- NA
+    }
+  }
+  else if (session == "7T"){
+    if ((block_num > 0) && (block_num<=4)) {
+      TOP_block <- timesObjectPresented - (block_num -1)*3
+    }
+    else {
+      TOP_block <- NA
+    }
+  }
+  else {TOP_block <- NA}
+  return(TOP_block)
+}
+
+
+```
+
+
+
+
+# 🔹 Preprocessing 1 — Trial-level summarisation
+```{r preprocessing_1}
+
+filtered_3T_trial <- OLM_3T_trial_results %>%
+  
+  # --------------------------------------------------
+  # Merge lookup table
+  # --------------------------------------------------
+  left_join(lookUpTable, by = c("subject" = "anonKey")) %>%
+  
+  # --------------------------------------------------
+  # Participant filtering
+  # --------------------------------------------------
+  filter(Rnum %in% pp_43_list) %>%
+  
+  # --------------------------------------------------
+  # Trial-level grouping
+  # --------------------------------------------------
+  group_by(
+    Rnum, trial_num, block_num, trial_num_in_block,
+    timesObjectPresented, objectName, trialType
+  ) %>%
+  
+  # --------------------------------------------------
+  # Summarise trial timing & behavior
+  # --------------------------------------------------
+  summarise(
+    
+    # cue & delay
+    cue_onset       = start_time - runStartTime,
+    cue_duration    = 2,
+    delay_onset     = cue_onset + cue_duration,
+    delay_duration  = delay,
+    
+    # search phase
+    search_onset    = navStartTime - runStartTime,
+    search_duration = confirmButtonTime - navStartTime,
+    
+    # collect phase
+    collect_onset    = confirmButtonTime - runStartTime,
+    collect_duration = navEndTime - confirmButtonTime,
+    
+    # pass-through
+    runStartTime = runStartTime,
+    start_time   = start_time,
+    end_time     = end_time,
+    
+    euclidean_distance = euclideanDistance,
+    warning_shown      = warningShown,
+    
+    start_x = start_x,
+    start_z = start_z,
+    end_x   = end_x,
+    end_z   = end_z,
+    object_x = object_x,
+    object_z = object_z,
+    
+    # correctness
+    correct = correct_test(
+      end_x, end_z, objectName, obj_loc_3T, trialType
+    ),
+    
+    # starting distance
+    trial_distance = distance(start_x, start_z, object_x, object_z),
+    
+    .groups = "drop"
+  ) %>%
+  
+  # --------------------------------------------------
+  # Compute block-wise TOP
+  # --------------------------------------------------
+  rowwise() %>%
+  mutate(
+    timesObjectPresented_block =
+      calculate_TOP_in_block("3T", block_num, timesObjectPresented)
+  ) %>%
+  ungroup()
+```
+
+
+
+# 🔹 Preprocessing 2 — Search-phase position extraction
+
+```{r preprocessing_2}
+
+OLM_3T_position_data <- OLM_3T_position_data %>%
+  
+  # --------------------------------------------------
+  # Merge lookup table
+  # --------------------------------------------------
+  left_join(lookUpTable, by = c("subject" = "anonKey")) %>%
+  
+  # --------------------------------------------------
+  # Trial-wise ordering & movement classification
+  # --------------------------------------------------
+  group_by(Rnum, trial) %>%
+  arrange(time, .by_group = TRUE) %>%
+  mutate(
+    status = case_when(
+      abs(lag(pos_x, default = pos_x[1]) - pos_x) > 0.02 |
+      abs(lag(pos_z, default = pos_z[1]) - pos_z) > 0.02 ~ "translation",
+      abs(lag(rot_y, default = rot_y[1]) - rot_y) > 0.02 ~ "rotation",
+      TRUE ~ "stationary"
+    )
+  ) %>%
+  ungroup() %>%
+  rename(trial_num = trial) %>%
+  
+  # --------------------------------------------------
+  # Merge trial-level variables
+  # --------------------------------------------------
+  left_join(
+    filtered_3T_trial %>%
+      select(
+        Rnum, trial_num, block_num, trial_num_in_block,
+        objectName, timesObjectPresented,
+        runStartTime, search_onset, collect_onset,
+        collect_duration, start_x, start_z,
+        object_x, object_z, euclidean_distance
+      ),
+    by = c("Rnum", "trial_num")
+  )
+
+
+# --------------------------------------------------
+# Extract search phase only
+# --------------------------------------------------
+
+filtered_search_3T_position <- OLM_3T_position_data %>%
+  filter(Rnum %in% pp_43_list) %>%
+  arrange(Rnum, time) %>%
+  filter(
+    time > (runStartTime + search_onset),
+    time < (runStartTime + collect_onset)
+  )
+
+
+# --------------------------------------------------
+# Compute mean starting rotation
+# --------------------------------------------------
+
+start_rot <- filtered_search_3T_position %>%
+  group_by(Rnum, trial_num) %>%
+  arrange(time) %>%
+  summarise(
+    start_rot = rot_y[1],
+    .groups = "drop"
+  ) %>%
+  group_by(trial_num) %>%
+  summarise(
+    start_rot = mean(start_rot),
+    .groups = "drop"
+  )
+
+# write.csv(filtered_search_3T_position, "...", row.names = FALSE)
+```
+
+---
+
+# 🔹  Step segmentation & navigation metrics
+
+```{r navigation metrics}
+
+# --------------------------------------------------
+# Segment continuous movement epochs
+# --------------------------------------------------
+
+search_3T_status <- filtered_search_3T_position %>%
+  group_by(Rnum, trial_num) %>%
+  mutate(
+    status_id = cumsum(status != lag(status, default = first(status)))
+  ) %>%
+  ungroup() %>%
+  group_by(
+    Rnum, block_num, trial_num,
+    objectName, timesObjectPresented,
+    euclidean_distance, status_id, status
+  ) %>%
+  arrange(time) %>%
+  summarise(
+    start_time  = first(time),
+    end_time    = last(time),
+    start_pos_x = first(pos_x),
+    start_pos_z = first(pos_z),
+    start_rot_y = first(rot_y),
+    end_pos_x   = last(pos_x),
+    end_pos_z   = last(pos_z),
+    end_rot_y   = last(rot_y),
+    .groups = "drop"
+  )
+
+
+# --------------------------------------------------
+# Extract translation steps
+# --------------------------------------------------
+
+search_3T_steps <- search_3T_status %>%
+  filter(status == "translation") %>%
+  group_by(Rnum, trial_num) %>%
+  arrange(start_time) %>%
+  mutate(
+    steps_id    = row_number(),
+    step_length = distance(
+      start_pos_x, start_pos_z,
+      end_pos_x,   end_pos_z
+    ),
+    step_angle  = (atan2(
+      end_pos_z - start_pos_z,
+      end_pos_x - start_pos_x
+    ) + pi) * 180 / pi
+  ) %>%
+  ungroup() %>%
+  arrange(Rnum, trial_num, steps_id)
+
+
+# --------------------------------------------------
+# Trial-level step metrics
+# --------------------------------------------------
+
+search_trial_steps <- search_3T_steps %>%
+  group_by(Rnum, trial_num) %>%
+  arrange(start_time) %>%
+  summarise(
+    start_step_angle = first(step_angle),
+    total_path       = sum(step_length, na.rm = TRUE),
+    moved_distance   = distance(
+      first(start_pos_x), first(start_pos_z),
+      last(end_pos_x),    last(end_pos_z)
+    ),
+    .groups = "drop"
+  )
+
+
+# --------------------------------------------------
+# Merge back to trial-level data
+# --------------------------------------------------
+
+search_trial_steps <- filtered_3T_trial %>%
+  left_join(search_trial_steps, by = c("Rnum", "trial_num")) %>%
+  left_join(start_rot, by = "trial_num") %>%
+  mutate(
+    
+    decreased_distance = trial_distance - euclidean_distance,
+    path_efficiency    = decreased_distance / total_path,
+    path_efficiency    = replace_na(path_efficiency, 0),
+    start_step_angle = coalesce(start_step_angle, start_rot),
+    correct_start_angle = (atan2(
+      object_z - start_z,
+      object_x - start_x
+    ) + pi) * 180 / pi,
+    
+    angular_error = ifelse(
+      abs(start_step_angle - correct_start_angle) < 180,
+      abs(start_step_angle - correct_start_angle),
+      360 - abs(start_step_angle - correct_start_angle)
+    )
+  )
+
+# write.csv(search_3T_steps, "...", row.names = FALSE)
+```
+
+# 🔹  LMM-ready behavioral dataset
+```{r LMM-ready behavioral dataset}
+
+# ============================================================
+# 1. Construct trial-level behavioral metrics
+# ============================================================
+
+LMM_behavior <- search_trial_steps %>%
+  
+  # --------------------------------------------------
+  # Participant filtering
+  # --------------------------------------------------
+  filter(Rnum %in% pp_43_list) %>%
+  
+  # --------------------------------------------------
+  # Rename core behavioral measures
+  # --------------------------------------------------
+  mutate(
+    PE  = path_efficiency,      # Path Efficiency
+    AE  = angular_error,        # Angular Error
+    PlE = euclidean_distance,   # Placement Error
+    AR  = as.numeric(correct)   # Accuracy Rate
+  ) %>%
+  
+  # --------------------------------------------------
+  # Within-subject standardisation
+  # --------------------------------------------------
+  group_by(Rnum) %>%
+  mutate(
+    z_PE  = as.numeric(scale(PE)),
+    z_AE  = as.numeric(scale(AE)),
+    z_PlE = as.numeric(scale(PlE)),
+    z_AR  = as.numeric(scale(AR)),
+    
+    # Composite indices
+    NE_z  = z_PE - z_AE,   # Navigation Efficiency
+    SMA_z = z_AR - z_PlE   # Spatial Memory Precision
+  ) %>%
+  ungroup() %>%
+  
+  # --------------------------------------------------
+  # Lagged learning metrics (object-wise)
+  # --------------------------------------------------
+  group_by(Rnum, objectName) %>%
+  arrange(timesObjectPresented, .by_group = TRUE) %>%
+  mutate(
+    lag_NE  = lag(NE_z),
+    lag_SMA = lag(SMA_z)
+  ) %>%
+  ungroup() %>%
+  
+  # --------------------------------------------------
+  # Final variable selection
+  # --------------------------------------------------
+  select(
+    Rnum,
+    block_num,
+    trial_num,
+    objectName,
+    timesObjectPresented,
+    timesObjectPresented_block,
+    
+    PE, AE, PlE, AR,
+    z_PE, z_AE, z_PlE, z_AR,
+    
+    NE_z,  lag_NE,
+    SMA_z, lag_SMA
+  ) %>%
+  
+  arrange(Rnum, trial_num)
+
+
+# ============================================================
+# 2. Block-level comparisons
+# ============================================================
+
+t.test(NE_z  ~ block_num, data = LMM_behavior)
+t.test(SMA_z ~ block_num, data = LMM_behavior)
+
+# write.csv(
+#   LMM_behavior,
+#   "/Volumes/external/Users/work/Documents/Projects/VP00157/SpatialLearning/manuscript/scripts/behavior/LMM/LMM_behavior.csv",
+#   row.names = FALSE
+# )
+```
+# 🔹 Processing 5 — statistics on navigation behavior
+```{r locomotion }
+# ============================================================
+# 1. movement switch 
+locomotion_switch <- search_3T_status %>%
+  group_by(Rnum,trial_num,block_num,timesObjectPresented)%>%
+  summarise(n_switch = sum(status != 'stationary'),
+            switch_frequency = n_switch / sum(end_time - start_time) ,
+            .groups = 'drop')
+
+locomotion_switch_top <- locomotion_switch %>%
+  group_by(Rnum,timesObjectPresented)%>%
+  summarise(n_switch = mean(n_switch),
+            switch_time = 1 / mean(switch_frequency),
+            .groups = 'drop')
+
+locomotion_switch_run <- locomotion_switch %>%
+  group_by(Rnum,block_num)%>%
+  summarise(n_switch = mean(n_switch),
+            switch_time = 1 / mean(switch_frequency),
+            .groups = 'drop')
+
+locomotion_switch_summary <- locomotion_switch %>%
+  group_by(Rnum)%>%
+  summarise(n_switch = mean(n_switch),
+            switch_time = 1 / mean(switch_frequency),
+            ,groups = 'drop')
+
+mean(locomotion_switch_summary$n_switch)
+se(locomotion_switch_summary$n_switch)
+
+mean(locomotion_switch_summary$switch_time)
+se(locomotion_switch_summary$switch_time)
+
+x <- locomotion_switch_run$n_switch[locomotion_switch_run$block_num == 1]
+y <- locomotion_switch_run$n_switch[locomotion_switch_run$block_num == 2]
+t.test(x,y,paired = T)
+
+x <- locomotion_switch_run$switch_time[locomotion_switch_run$block_num == 1]
+y <- locomotion_switch_run$switch_time[locomotion_switch_run$block_num == 2]
+t.test(x,y,paired = T)  
+
+write.csv(locomotion_switch_top,"/Volumes/external/Users/work/Documents/Projects/VP00157/SpatialLearning/manuscript/scripts/behavior/locomotion_switch_summary.csv",row.names = FALSE)
+```
+
+

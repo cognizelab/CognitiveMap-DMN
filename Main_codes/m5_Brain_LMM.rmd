@@ -1,0 +1,190 @@
+---
+title: "Linear Mixed-Effects Models for Behavioral Analyses"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message = FALSE,
+	warning = FALSE
+)
+library(ggplot2)
+library(ggsignif)
+library(plyr)
+library(dplyr)
+library(plotly)
+library(tidyr)
+library(readr)
+library(ggExtra)
+library(lme4)
+library(lmerTest)
+library(ggforce)
+library(ggeffects)
+library(emmeans)
+
+
+```
+
+# 🔷 1️⃣ Brain signature responess increase withobject repetition
+
+```{r}
+# ============================================================
+# LMM  — signature response (signature_z_block)
+# Fixed: object repetition (timesObjectPresented_block 1-3)
+# Random: subject
+# ============================================================
+
+lmm_brain_top <- lmer(
+  signature_z_block ~ timesObjectPresented_block +  (1 + timesObjectPresented_block | Rnum),
+  data = LMM_all,
+  REML = TRUE
+)
+
+summary(lmm_brain_top)
+# ------------------------------------------------------------
+# Marginal predictions
+# ------------------------------------------------------------
+
+pred_brain_top   <- ggpredict(lmm_brain_top, terms = "timesObjectPresented_block")
+
+
+
+```
+
+
+
+# 🔷 2️⃣ Brain signature predicts trial-wise spatial memory precision
+```{r lmm_SMA}
+
+# ============================================================
+# LMM  — Spatial Memory Precision (SMA_z_block)
+# Fixed: signature response
+# Random: subject
+# ============================================================
+
+
+
+lmm_SMA_brain <- lmer(
+  SMA_z_block ~ signature_z_block +  (0 + signature_z_block | Rnum),
+  data = LMM_all,
+  REML = TRUE
+)
+
+
+summary(lmm_SMA_brain)
+
+
+
+# ------------------------------------------------------------
+# Marginal predictions
+# ------------------------------------------------------------
+
+pred_SMA_brain   <- ggpredict(lmm_SMA_brain, terms = "signature_z_block")
+
+
+
+```
+
+
+#  🔷 3️⃣ Navigation Efficiency Modelss
+
+```{r lmm_NE}
+
+# ============================================================
+# LMM  — Navigation Efficiency (NE_z_block)
+# Fixed: signature response(signature_z_block)
+# Random: subject slopes
+# ============================================================
+lmm_NE_brain <- lmer(
+  NE_z_block ~ signature_z_block +  (0 + signature_z_block | Rnum),
+  data = LMM_all,
+  REML = TRUE
+)
+
+
+summary(lmm_NE_brain)
+
+
+
+
+# ------------------------------------------------------------
+# Marginal predictions
+# ------------------------------------------------------------
+
+pred_NE_brain  <- ggpredict(lmm_NE_brain, terms = "signature_z_block")
+
+```
+```{r DMN component}
+# ============================================================
+# LMM  — only use positive DMN component to predict
+# ============================================================
+
+lmm_SMA_DMN <- lmer(
+  SMA_z_block ~ signature_DMN_haufe_z_block +  (0 + signature_DMN_haufe_z_block | Rnum),
+  data = LMM_all,
+  REML = TRUE
+)
+
+
+summary(lmm_SMA_DMN)
+
+
+
+
+# ------------------------------------------------------------
+# Marginal predictions
+# ------------------------------------------------------------
+
+pred_SMA_DMN  <- ggpredict(lmm_SMA_DMN, terms = "signature_DMN_haufe_z_block")
+
+
+lmm_NE_DMN <- lmer(
+  NE_z_block ~ signature_DMN_haufe_z_block +  (0 + signature_DMN_haufe_z_block | Rnum),
+  data = LMM_all,
+  REML = TRUE
+)
+
+
+summary(lmm_NE_DMN)
+
+
+
+
+# ------------------------------------------------------------
+# Marginal predictions
+# ------------------------------------------------------------
+
+pred_NE_DMN  <- ggpredict(lmm_NE_DMN, terms = "signature_DMN_haufe_z_block")
+```
+
+
+
+```{r save data}
+pred_list <- list(
+  brain_top = pred_brain_top,
+  SMA_brain = pred_SMA_brain,
+  NE_brain  = pred_NE_brain,
+  SMA_DMN = pred_SMA_DMN,
+  NE_DMN = pred_NE_DMN)
+
+base_path <- "/Volumes/external/Users/work/Documents/Projects/VP00157/SpatialLearning/manuscript/results/MVPA/Characteristics/"
+
+for (name in names(pred_list)) {
+  pred <- pred_list[[name]]
+  out_df <- data.frame(
+    x     = pred$x,
+    fit   = pred$predicted,
+    lower = pred$conf.low,
+    upper = pred$conf.high
+  )
+  write.csv(out_df, 
+            file = paste0(base_path, name, "_fixedEffect.csv"), 
+            row.names = FALSE)
+}
+
+
+
+```
+
+
