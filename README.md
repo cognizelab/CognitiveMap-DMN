@@ -25,11 +25,14 @@ Here is a detailed guide to the code and files included in this repository:
 
 ## Prerequisites
 - MATLAB Dependencies:
-	- [CanlabCore](https://github.com/canlab/CanlabCore);
+	- [CanlabCore](https://github.com/canlab/CanlabCore)
 	- [cifti-matlab](https://github.com/Washington-University/cifti-matlab).
 
+- R Dependencies:
+  	- For behavioral analyses and linear mixed-effects modeling: dplyr, tidyr, lme4, lmerTest, ggeffects.
+
 - Python Dependencies:
-	- For reproducing the figures using Jupyter notebooks, the following Python packages are required: NumPy, Pandas, Matplotlib, SciPy
+	- For reproducing the figures using Jupyter notebooks: NumPy, Pandas, Matplotlib, SciPy.
 
 
 ## Data Availability
