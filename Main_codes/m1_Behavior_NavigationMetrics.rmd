@@ -1,17 +1,6 @@
 ```{r library}
-library(ggplot2)
-library(ggsignif)
-library(plyr)
 library(dplyr)
-library(plotly)
 library(tidyr)
-library(readr)
-library(ggExtra)
-library(lme4)
-library(lmerTest)
-library(ggforce)
-library(ggeffects)
-library(emmeans)
 ```
 
 ```{r functions}
@@ -409,18 +398,8 @@ LMM_behavior <- search_trial_steps %>%
   arrange(Rnum, trial_num)
 
 
-# ============================================================
-# 2. Block-level comparisons
-# ============================================================
 
-t.test(NE_z  ~ block_num, data = LMM_behavior)
-t.test(SMA_z ~ block_num, data = LMM_behavior)
 
-# write.csv(
-#   LMM_behavior,
-#   "/Volumes/external/Users/work/Documents/Projects/VP00157/SpatialLearning/manuscript/scripts/behavior/LMM/LMM_behavior.csv",
-#   row.names = FALSE
-# )
 ```
 # 🔹 Processing 5 — statistics on navigation behavior
 ```{r locomotion }
@@ -464,7 +443,7 @@ x <- locomotion_switch_run$switch_time[locomotion_switch_run$block_num == 1]
 y <- locomotion_switch_run$switch_time[locomotion_switch_run$block_num == 2]
 t.test(x,y,paired = T)  
 
-write.csv(locomotion_switch_top,"/Volumes/external/Users/work/Documents/Projects/VP00157/SpatialLearning/manuscript/scripts/behavior/locomotion_switch_summary.csv",row.names = FALSE)
+
 ```
 
 

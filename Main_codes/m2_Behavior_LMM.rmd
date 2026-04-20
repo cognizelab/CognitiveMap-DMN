@@ -10,18 +10,10 @@ knitr::opts_chunk$set(
 	warning = FALSE
 )
 library(ggplot2)
-library(ggsignif)
-library(plyr)
-library(dplyr)
-library(plotly)
-library(tidyr)
-library(readr)
-library(ggExtra)
-library(lme4)
-library(lmerTest)
-library(ggforce)
-library(ggeffects)
-library(emmeans)
+library(lme4)        # lmer()
+library(lmerTest)    # p-values
+library(ggeffects)   # ggpredict()
+library(dplyr)       
 
 
 ```
