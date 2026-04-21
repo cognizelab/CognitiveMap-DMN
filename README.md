@@ -1,3 +1,5 @@
+[![DOI](https://doi.org/10.5281/zenodo.19673813.svg)](https://doi.org/10.5281/zenodo.19673813)
+
 # Repository for "Default mode network facilitates the formation of cognitive maps"
 
 Authors: Liangyue Song, Jörn A. Quent, Xinyu Liang, Kaixiang Zhuang and Deniz Vatansever.
