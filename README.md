@@ -1,6 +1,6 @@
 [![DOI](https://doi.org/10.5281/zenodo.19673813.svg)](https://doi.org/10.5281/zenodo.19673813)
 
-# Repository for "Default mode network facilitates the formation of cognitive maps"
+# Repository for "Default mode engagement tracks the formation of cognitive maps during naturalistic spatial learning"
 
 Authors: Liangyue Song, Jörn A. Quent, Xinyu Liang, Kaixiang Zhuang and Deniz Vatansever.
 
