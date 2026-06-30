@@ -33,6 +33,7 @@ The demo is designed to introduce the core **SVR-based multivariate pattern anal
 The demo can be reproduced in two ways:
 1. Load the pre-generated simulated dataset: ***Demo/Data/demo_data.mat***
 2. Regenerate the simulated dataset by running: ***Demo/Data/generate_data.m***
+   
 Then run: ***Demo/Demo_MVPA*** to execute the complete SVR-based MVPA pipeline.
 The analysis includes:
 1. **Group-based cross-validation** for subject-independent **SVR model training and cross-validated prediction**, with prediction performance quantified by correlation and RMSE.
