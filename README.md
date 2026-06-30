@@ -25,16 +25,22 @@ Here is a detailed guide to the code and files included in this repository:
   - ***Figure_data/***: Precomputed outputs used for figure generation and visualization.
 
 - ***Demo/*** Example scripts demonstrating the complete SVR-based multivariate prediction pipeline using a simulated dataset that mimics subject-level variability and correlated feature noise, illustrating the importance of the Haufe transform for interpreting predictive models.
-	- ***demo_generate_data.m*** Generates a simulated dataset with known ground-truth activation patterns, correlated feature noise, and subject-specific random effects.
-	- ***demo_main.m*** Demonstrates the complete analysis workflow, including group-based cross-validation, prediction performance evaluation, permutation testing, bootstrap estimation of feature importance, and Haufe transformation for model interpretation.
+	- ***Data/demo_generate_data.m*** Generates a simulated dataset with known ground-truth activation patterns, correlated feature noise, and subject-specific random effects.
+	- ***demo_MVPA.mlx*** Demonstrates the complete analysis workflow, including group-based cross-validation, prediction performance evaluation, permutation testing, bootstrap estimation of feature importance, and Haufe transformation for model interpretation.
 
 ## Instructions for Demo
 The demo is designed to introduce the core **SVR-based multivariate pattern analysis (MVPA)** pipeline implemented in the MVPA Toolkit. Using a simulated dataset with subject-level structure, group-based cross-validation, correlated feature noise, and a known ground-truth activation pattern, it demonstrates both predictive modeling and model interpretation.
 The demo can be reproduced in two ways:
 1. Load the pre-generated simulated dataset: ***Demo/Data/demo_data.mat***
 2. Regenerate the simulated dataset by running: ***Demo/Data/generate_data.m***
+Then run: ***Demo/Demo_MVPA*** to execute the complete SVR-based MVPA pipeline.
+The analysis includes:
+1. **Group-based cross-validation** for subject-independent **SVR model training and cross-validated prediction**, with prediction performance quantified by correlation and RMSE.
+2. **Permutation testing** to assess the statistical significance of prediction performance.
+3. **Bootstrap resampling** to estimate feature importance by generating both predictive weights and Haufe-transformed activation patterns.
+4. **Comparison of predictive weights and Haufe-transformed activation patterns** with the known ground-truth activation pattern, demonstrating why the Haufe transform provides a more interpretable estimate of feature importance in SVR-based MVPA.
 
-Then run: ***Demo/Demo_MVPA*** to execute the complete SVR-based MVPA pipeline, including **group-based cross-validation**, **model training**, **prediction performance evaluation**, **permutation testing**, **bootstrap estimation of feature importance**, **Haufe transformation**, and **comparison of the ground-truth activation pattern, predictive weights, and Haufe-transformed activation patterns**.Typical runtime on the system described above is **less than 5 minutes**.
+**Note:** The demo was tested using **MATLAB R2024b** on an **Apple Mac mini (2024, Apple M4, 24 GB RAM, 10 CPU cores)**, with a typical runtime of **less than 5 minutes**. The default bootstrap analysis uses **5 parallel workers**, so runtime may vary depending on the available computing resources. The **CanlabCore** toolbox is required as a dependency for the **MVPA Toolkit**.
 
 ## Prerequisites
 - MATLAB Dependencies:
