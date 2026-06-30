@@ -24,6 +24,9 @@ Here is a detailed guide to the code and files included in this repository:
   - ***Figure2-4.mlx***: MATLAB Live Scripts for reproducing each main figure (Figures 2–4).  
   - ***Figure_data/***: Precomputed outputs used for figure generation and visualization.
 
+- ***Demo/*** Example scripts demonstrating the complete SVR-based multivariate prediction pipeline using a simulated dataset that mimics subject-level variability and correlated feature noise, illustrating the importance of the Haufe transform for interpreting predictive models.
+	- ***demo_generate_data.m*** Generates a simulated dataset with known ground-truth activation patterns, correlated feature noise, and subject-specific random effects.
+	- ***demo_main.m*** Demonstrates the complete analysis workflow, including group-based cross-validation, prediction performance evaluation, permutation testing, bootstrap estimation of feature importance, and Haufe transformation for model interpretation.
 
 ## Prerequisites
 - MATLAB Dependencies:
