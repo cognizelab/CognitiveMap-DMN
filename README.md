@@ -28,6 +28,14 @@ Here is a detailed guide to the code and files included in this repository:
 	- ***demo_generate_data.m*** Generates a simulated dataset with known ground-truth activation patterns, correlated feature noise, and subject-specific random effects.
 	- ***demo_main.m*** Demonstrates the complete analysis workflow, including group-based cross-validation, prediction performance evaluation, permutation testing, bootstrap estimation of feature importance, and Haufe transformation for model interpretation.
 
+## Instructions for Demo
+The demo is designed to introduce the core **SVR-based multivariate pattern analysis (MVPA)** pipeline implemented in the MVPA Toolkit. Using a simulated dataset with subject-level structure, group-based cross-validation, correlated feature noise, and a known ground-truth activation pattern, it demonstrates both predictive modeling and model interpretation.
+The demo can be reproduced in two ways:
+1. Load the pre-generated simulated dataset: ***Demo/Data/demo_data.mat***
+2. Regenerate the simulated dataset by running: ***Demo/Data/generate_data.m***
+
+Then run: ***Demo/Demo_MVPA*** to execute the complete SVR-based MVPA pipeline, including **group-based cross-validation**, **model training**, **prediction performance evaluation**, **permutation testing**, **bootstrap estimation of feature importance**, **Haufe transformation**, and **comparison of the ground-truth activation pattern, predictive weights, and Haufe-transformed activation patterns**.Typical runtime on the system described above is **less than 5 minutes**.
+
 ## Prerequisites
 - MATLAB Dependencies:
 	- [CanlabCore](https://github.com/canlab/CanlabCore)
@@ -39,6 +47,14 @@ Here is a detailed guide to the code and files included in this repository:
 - Python Dependencies:
 	- For reproducing the figures using Jupyter notebooks: NumPy, Pandas, Matplotlib, SciPy.
 
+## System Requirements
+The code has been tested on the following environment:
+- **Operating system:** macOS (Apple Silicon)
+- **Hardware:** Apple Mac mini (2024, Apple M4, 24 GB RAM)
+- **MATLAB:** R2024b
+- **Python:** 3.9.7
+- **R:** 2025.09.0+387
+No specialized hardware is required.
 
 ## Data Availability
 The raw data generated in this study cannot be made publicly available due to restrictions imposed by institutional ethics approval and the informed consent obtained from study participants. Individual-specific brain maps (e.g., fMRI response estimates) are available under restricted access to qualified researchers, contingent upon approval of a data use agreement and compliance with institutional ethics guidelines. Access requests should be submitted to the corresponding author (Prof. Deniz Vatansever, deniz@fudan.edu.cn) and will be reviewed by the institutional data access committee. Requests will typically receive a response within 4 weeks. Approved data will be made available for non-commercial research purposes for a period of 5 years following approval. 
