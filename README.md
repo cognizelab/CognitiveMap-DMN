@@ -41,7 +41,7 @@ The analysis includes:
 3. **Bootstrap resampling** to estimate feature importance by generating both predictive weights and Haufe-transformed activation patterns.
 4. **Comparison of predictive weights and Haufe-transformed activation patterns** with the known ground-truth activation pattern, demonstrating why the Haufe transform provides a more interpretable estimate of feature importance in SVR-based MVPA.
 
-**Note:** The demo was tested using **MATLAB R2024b** with a typical runtime of less than 5 minutes. The default bootstrap analysis uses 5 parallel workers, so runtime may vary depending on the available computing resources. The **CanlabCore** toolbox is required as a dependency for the **MVPA Toolkit**.
+**Note:** The demo was tested using **MATLAB R2024b** with a typical runtime of less than 5 minutes. The default bootstrap analysis uses 5 parallel workers, so runtime may vary depending on the available computing resources. The CanlabCore toolbox is required as a dependency for the MVPA Toolkit.
 
 ## Prerequisites
 - MATLAB Dependencies:
