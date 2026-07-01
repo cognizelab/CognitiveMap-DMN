@@ -24,8 +24,8 @@ Here is a detailed guide to the code and files included in this repository:
   - ***Figure_data/***: Precomputed outputs used for figure generation and visualization.
 
 - ***Demo/*** Example scripts demonstrating the complete SVR-based multivariate prediction pipeline using a simulated dataset that mimics subject-level variability and correlated feature noise, illustrating the importance of the Haufe transform for interpreting predictive models.
-	- ***Data/demo_generate_data.m*** Generates a simulated dataset with known ground-truth activation patterns, correlated feature noise, and subject-specific random effects.
-	- ***demo_MVPA.mlx*** Demonstrates the complete analysis workflow, including group-based cross-validation, prediction performance evaluation, permutation testing, bootstrap estimation of feature importance, and Haufe transformation for model interpretation.
+	- ***Data/generate_data.m*** Generates a simulated dataset with known ground-truth activation patterns, correlated feature noise, and subject-specific random effects.
+	- ***Demo_MVPA.mlx*** Demonstrates the complete analysis workflow, including group-based cross-validation, prediction performance evaluation, permutation testing, bootstrap estimation of feature importance, and Haufe transformation for model interpretation.
 
 ## Instructions for Demo
 The demo is designed to introduce the core **SVR-based multivariate pattern analysis (MVPA)** pipeline implemented in the MVPA Toolkit. Using a simulated dataset with subject-level structure, group-based cross-validation, correlated feature noise, and a known ground-truth activation pattern, it demonstrates both predictive modeling and model interpretation.
@@ -43,7 +43,7 @@ The analysis includes:
 **Note:** The demo was tested using **MATLAB R2024b** with a typical runtime of less than 5 minutes. The default bootstrap analysis uses 5 parallel workers, so runtime may vary depending on the available computing resources. The CanlabCore toolbox is required as a dependency for the MVPA Toolkit.
 
 ## Prerequisites
-The following software and dependencies must be installed before running the analysis.
+The following software and dependencies must be installed before running the analysis. Installation can be completed either through the official distributions or the GitHub repositories listed below. Under normal network conditions, installation of the required dependencies typically takes less than 5 minutes.
 - MATLAB Dependencies:
 	- [CanlabCore](https://github.com/canlab/CanlabCore)
 	- [cifti-matlab](https://github.com/Washington-University/cifti-matlab).
