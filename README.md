@@ -1,4 +1,3 @@
-[![DOI](https://doi.org/10.5281/zenodo.19673813.svg)](https://doi.org/10.5281/zenodo.19673813)
 
 # Repository for "Default mode engagement tracks the formation of cognitive maps during naturalistic spatial learning"
 
@@ -24,8 +23,27 @@ Here is a detailed guide to the code and files included in this repository:
   - ***Figure2-4.mlx***: MATLAB Live Scripts for reproducing each main figure (Figures 2–4).  
   - ***Figure_data/***: Precomputed outputs used for figure generation and visualization.
 
+- ***Demo/*** Example scripts demonstrating the complete SVR-based multivariate prediction pipeline using a simulated dataset that mimics subject-level variability and correlated feature noise, illustrating the importance of the Haufe transform for interpreting predictive models.
+	- ***Data/generate_data.m*** Generates a simulated dataset with known ground-truth activation patterns, correlated feature noise, and subject-specific random effects.
+	- ***Demo_MVPA.mlx*** Demonstrates the complete analysis workflow, including group-based cross-validation, prediction performance evaluation, permutation testing, bootstrap estimation of feature importance, and Haufe transformation for model interpretation.
+
+## Instructions for Demo
+The demo is designed to introduce the core **SVR-based multivariate pattern analysis (MVPA)** pipeline implemented in the MVPA Toolkit. Using a simulated dataset with subject-level structure, group-based cross-validation, correlated feature noise, and a known ground-truth activation pattern, it demonstrates both predictive modeling and model interpretation.
+The demo can be reproduced in two ways:
+1. Load the pre-generated simulated dataset: ***Demo/Data/demo_data.mat***
+2. Regenerate the simulated dataset by running: ***Demo/Data/generate_data.m***
+   
+Then run: ***Demo/Demo_MVPA*** to execute the complete SVR-based MVPA pipeline.
+The analysis includes:
+1. **Group-based cross-validation** for subject-independent **SVR model training and cross-validated prediction**, with prediction performance quantified by correlation and RMSE.
+2. **Permutation testing** to assess the statistical significance of prediction performance.
+3. **Bootstrap resampling** to estimate feature importance by generating both predictive weights and Haufe-transformed activation patterns.
+4. **Comparison of predictive weights and Haufe-transformed activation patterns** with the known ground-truth activation pattern, demonstrating why the Haufe transform provides a more interpretable estimate of feature importance in SVR-based MVPA.
+
+**Note:** The demo was tested using **MATLAB R2024b** with a typical runtime of less than 5 minutes. The default bootstrap analysis uses 5 parallel workers, so runtime may vary depending on the available computing resources. The CanlabCore toolbox is required as a dependency for the MVPA Toolkit.
 
 ## Prerequisites
+The following software and dependencies must be installed before running the analysis. Installation can be completed either through the official distributions or the GitHub repositories listed below. Under normal network conditions, installation of the required dependencies typically takes less than 5 minutes.
 - MATLAB Dependencies:
 	- [CanlabCore](https://github.com/canlab/CanlabCore)
 	- [cifti-matlab](https://github.com/Washington-University/cifti-matlab).
@@ -36,6 +54,14 @@ Here is a detailed guide to the code and files included in this repository:
 - Python Dependencies:
 	- For reproducing the figures using Jupyter notebooks: NumPy, Pandas, Matplotlib, SciPy.
 
+## System Requirements
+The code has been tested on the following environment:
+- **Operating system:** macOS (Apple Silicon)
+- **Hardware:** Apple Mac mini (2024, Apple M4, 24 GB RAM)
+- **MATLAB:** R2024b
+- **Python:** 3.9.7
+- **R:** 4.5.0
+No specialized hardware is required.
 
 ## Data Availability
 The raw data generated in this study cannot be made publicly available due to restrictions imposed by institutional ethics approval and the informed consent obtained from study participants. Individual-specific brain maps (e.g., fMRI response estimates) are available under restricted access to qualified researchers, contingent upon approval of a data use agreement and compliance with institutional ethics guidelines. Access requests should be submitted to the corresponding author (Prof. Deniz Vatansever, deniz@fudan.edu.cn) and will be reviewed by the institutional data access committee. Requests will typically receive a response within 4 weeks. Approved data will be made available for non-commercial research purposes for a period of 5 years following approval. 
