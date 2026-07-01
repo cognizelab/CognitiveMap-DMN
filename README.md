@@ -1,4 +1,3 @@
-[![DOI](https://doi.org/10.5281/zenodo.19673813.svg)](https://doi.org/10.5281/zenodo.19673813)
 
 # Repository for "Default mode engagement tracks the formation of cognitive maps during naturalistic spatial learning"
 
@@ -44,6 +43,7 @@ The analysis includes:
 **Note:** The demo was tested using **MATLAB R2024b** with a typical runtime of less than 5 minutes. The default bootstrap analysis uses 5 parallel workers, so runtime may vary depending on the available computing resources. The CanlabCore toolbox is required as a dependency for the MVPA Toolkit.
 
 ## Prerequisites
+The following software and dependencies must be installed before running the analysis.
 - MATLAB Dependencies:
 	- [CanlabCore](https://github.com/canlab/CanlabCore)
 	- [cifti-matlab](https://github.com/Washington-University/cifti-matlab).
@@ -60,7 +60,7 @@ The code has been tested on the following environment:
 - **Hardware:** Apple Mac mini (2024, Apple M4, 24 GB RAM)
 - **MATLAB:** R2024b
 - **Python:** 3.9.7
-- **R:** 2025.09.0+387
+- **R:** 4.5.0
 No specialized hardware is required.
 
 ## Data Availability
