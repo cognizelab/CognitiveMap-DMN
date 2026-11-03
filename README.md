@@ -17,7 +17,7 @@ Here is a detailed guide to the code and files included in this repository:
 	- ***m3_Brain_SVR.m*** Script for SVR-based MVPA to predict spatial memory precision, assess predictive performance, and derive the corresponding neural signature.
 	- ***m4_Brain_NeurosynthDecoding.m*** Script for surface-based Neurosynth decoding for neural signatures.
 	- ***m5_Brain_LMM.rmd***  Script for testing the construct validity of the derived neural signature by modeling trial-wise behavioral metrics of cognitive maps as a function of neural signature expression using linear mixed-effects models.
-   	- ***m6_Brain_SignatureSpecificity.m***  Script for testing our spatial learning signature using passive observation data from our dataset and [Mental Time Travel task] (https://individual-brain-charting.github.io/docs/tasks.html#mttwe) from the Individual Brain Charting dataset (IBC).
+   	- ***m6_Brain_SignatureSpecificity.m***  Script for testing our spatial learning signature using passive observation data from our dataset and [Mental Time Travel task](https://individual-brain-charting.github.io/docs/tasks.html#mttwe) from the Individual Brain Charting dataset (IBC).
 
 - ***Figure_codes/***: Jupyter notebooks and MATLAB Live Scripts (.mlx) for reproducing figures and visualizations presented in the manuscript.  
   - ***Figure2_FlowField.ipynb***: Notebook for generating group-level flow field visualizations of navigation behavior.  
